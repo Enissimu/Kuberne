@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loggenerator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loggenerator
+  template:
+    metadata:
+      labels:
+        app: loggenerator
+    spec:
+      containers:
+        - name: loggenerator
+          image: log_app:latest
+          imagePullPolicy: Never
