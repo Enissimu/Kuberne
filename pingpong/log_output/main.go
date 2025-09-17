@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
@@ -16,14 +15,12 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		file, err := os.ReadFile("/usr/src/app/files/hashes.txt")
-		counter, err2 := os.ReadFile("/usr/src/app/images/counter.txt")
-		if err != nil || err2 != nil {
+		if err != nil {
 			fmt.Printf("Error reading file: %v\n", err)
 			http.Error(w, "File not found", http.StatusNotFound)
 			return
 		}
-
-		w.Write([]byte(time.Now().String() + ":" + string(file) + "\n" + "Ping / Pongs: " + string(counter)))
+		w.Write(file)
 
 	})
 

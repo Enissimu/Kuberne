@@ -1,18 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loggenerator
+  name: log-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: loggenerator
+      app: log-app
   template:
     metadata:
       labels:
-        app: loggenerator
+        app: log-app
     spec:
+      volumes: # Define volume
+        - name: shared-log
+          emptyDir: {}
+        - name: shared-image
+          persistentVolumeClaim:
+            claimName: image-claim
       containers:
-        - name: loggenerator
-          image: log_app:latest
+        - name: log-server
+          image: log-server:latest
           imagePullPolicy: Never
+          volumeMounts: # Mount volume
+          - name: shared-log
+            mountPath: /usr/src/app/files
+          - name: shared-image
+            mountPath: /usr/src/app/images
+        - name: log-generator
+          image: log-generator:latest
+          imagePullPolicy: Never
+          volumeMounts: # Mount volume
+          - name: shared-log
+            mountPath: /usr/src/app/files
+        - name: pingpong
+          image: pingpong:latest
+          imagePullPolicy: Never
+          volumeMounts: # Mount volume
+          - name: shared-log
+            mountPath: /usr/src/app/files
+          - name: shared-image
+            mountPath: /usr/src/app/images

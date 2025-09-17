@@ -1,35 +1,33 @@
 package main
 
 import (
+	"crypto/sha256"
 	"fmt"
-	"math/rand"
-	"net/http"
+	"os"
 	"time"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 )
 
-func generateRandomString(length int) string {
-	var randomString string
-	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	for i := 0; i < length; i++ {
-		randomString += string(letters[rand.Intn(len(letters))])
-	}
-	return randomString
-}
-
 func main() {
+	file, error := os.Create("/usr/src/app/files/hashes.txt")
 
-	randomString := generateRandomString(rand.Intn(10) + 1)
+	if error != nil {
+		fmt.Println("Error creating file")
+	}
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(randomString))
-	})
-	http.ListenAndServe(":3000", r)
+	defer file.Close()
 
-	fmt.Println(time.Now().Format(time.RFC3339) + ":" + randomString)
+	for {
+		data := []byte(time.Now().String())
+
+		hash := sha256.Sum256(data)
+		_, error := file.WriteString(fmt.Sprintf("%x\n", hash))
+		if error != nil {
+			fmt.Println("Error", error)
+		}
+
+		fmt.Printf("Wrote hash: %x\n", hash)
+
+		time.Sleep(5 * time.Second)
+	}
 
 }
